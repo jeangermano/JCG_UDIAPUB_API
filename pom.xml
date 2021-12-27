@@ -86,9 +86,35 @@
         </dependencies>
     </dependencyManagement>
 
+    <profiles>
+        <profile>
+            <id>prod</id>
+            <properties>
+                <activeEnvironment>prod</activeEnvironment>
+                <skipTests>true</skipTests>
+                <skipITs>true</skipITs>
+            </properties>
+        </profile>
+        <profile>
+            <id>dev</id>
+            <properties>
+                <activeEnvironment>dev</activeEnvironment>
+            </properties>
+        </profile>
+    </profiles>
+
     <build>
         <pluginManagement>
             <plugins>
+                <!-- configuração para rodar spring boot através do parent pom -->
+                <plugin>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-maven-plugin</artifactId>
+                    <configuration>
+                        <skip>true</skip>
+                    </configuration>
+                </plugin>
+                <!-- end -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
@@ -113,7 +139,6 @@
                                 <artifactId>lombok-mapstruct-binding</artifactId>
                                 <version>${lombok-mapstruct-binding.version}</version>
                             </path>
-                            <!-- other annotation processors -->
                         </annotationProcessorPaths>
                     </configuration>
                 </plugin>
