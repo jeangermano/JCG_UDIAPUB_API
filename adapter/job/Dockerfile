@@ -1,5 +1,8 @@
 FROM adoptopenjdk/openjdk11:alpine-slim
-RUN apk --no-cache add curl=7.79.1-r0
+
+RUN apk update && \
+    apk upgrade && \
+    apk apk --no-cache add curl=7.79.1-r0
 
 ENV APP_TARGET target
 ENV APP udiapub-job.jar
