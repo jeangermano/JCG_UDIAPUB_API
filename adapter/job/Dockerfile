@@ -1,8 +1,9 @@
 FROM adoptopenjdk/openjdk11:alpine-slim
 
+# hadolint ignore=DL3018
 RUN apk update && \
     apk upgrade && \
-    apk apk --no-cache add curl=7.79.1-r0
+    apk apk --no-cache add curl
 
 ENV APP_TARGET target
 ENV APP udiapub-job.jar
