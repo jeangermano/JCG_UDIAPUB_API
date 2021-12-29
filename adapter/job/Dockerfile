@@ -1,4 +1,4 @@
-FROM adoptopenjdk/openjdk11:alpine-slim
+FROM adoptopenjdk/openjdk11:alpine
 
 # hadolint ignore=DL3018
 RUN apk --no-cache add curl
