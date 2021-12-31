@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: job-udiapub-deployment
+spec:
+  template:
+    metadata:
+      name: job-udiapub
+      labels:
+        app: job-udiapub
+    spec:
+      containers:
+        - name: job-udiapub-container
+          image: udiapub-job-image
+          imagePullPolicy: "Always"
+          ports:
+            - containerPort: 8090
+  selector:
+    matchLabels:
+      app: job-udiapub
