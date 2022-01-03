@@ -41,7 +41,7 @@
                         echo "3 - esperando a aplicação subir por até 25 seg"
                         NEXT_WAIT_TIME=0
                         APP_STATUS=
-                        until [ $NEXT_WAIT_TIME -gt 5 ] || [[ ${APP_STATUS} = "\\"healthy\\""  ]]; do
+                        until [ $NEXT_WAIT_TIME -gt 5 ] || [ "$APP_STATUS" = "\\"healthy\\""  ]; do
                           sleep 5;
                           APP_STATUS=$(docker inspect --format \'{{json .State.Health.Status}}\' ${CONTAINER_NAME})
                           NEXT_WAIT_TIME=$(( $NEXT_WAIT_TIME + 1 ));
@@ -53,7 +53,7 @@
 
 
                         echo "5 - verificando o status da aplicação"
-                        if [[ ${APP_STATUS} != "\\"healthy\\"" ]]; then
+                        if [ "$APP_STATUS" != "\\"healthy\\"" ]; then
                           echo " --> a applicação não foi executada com sucesso"
                           exit 1
                         fi'''
