@@ -11,7 +11,7 @@
                         appEnv = tag.equals("dev")  ? "dev" : "prod"
                         jobBuild = "udiapub-jobs-deploy-${appEnv}"
 
-                        sh 'mvn clean install -P ${appEnv}'
+                        sh "mvn clean install -P ${appEnv}"
                         appName = "udiapub-job-image"
                         registryHost = "127.0.0.1:30400/"
                         imageName = "${registryHost}${appName}:${tag}"
