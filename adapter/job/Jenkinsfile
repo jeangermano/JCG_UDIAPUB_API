@@ -22,37 +22,41 @@
             stage('Testando a imagem') {
                 steps {
                     script{
-                         sh '''#!/bin/sh
-
-                                echo "verificar e remover container de teste em execução"
-                                HAS_CONTAINER=$(docker ps -a -aq --filter name=udiapub-job_teste)
-                                if [ ${#HAS_CONTAINER} -ge 2 ]; then
-                                  docker rm -f $HAS_CONTAINER
-                                fi
+                        sh '''#!/bin/sh
+                        CONTAINER_NAME=udiapub-job_teste
 
 
-                                echo "executar a imagem do container"
-                                docker run -d --name udiapub-job_teste udiapub-job-image-build
+                        echo "1 - verificando se existe um container de teste em execução"
+                        HAS_CONTAINER=$(docker ps -a -aq --filter name=$CONTAINER_NAME)
+                        if [ ${#HAS_CONTAINER} -ge 2 ]; then
+                          echo " --> existe! realizando remoção"
+                          docker rm -f $HAS_CONTAINER
+                        fi
 
 
-                                echo "esperando a aplicação subir por 25 seg"
-                                NEXT_WAIT_TIME=0
-                                APP_STATUS=
-                                until [ $NEXT_WAIT_TIME -gt 5 ] || [ ${#APP_STATUS} -gt 0  ]; do
-                                  sleep 5;
-                                  APP_STATUS=$(docker logs udiapub-job_teste | grep "Started UdiaPubJobApplication")
-                                  NEXT_WAIT_TIME=$(( $NEXT_WAIT_TIME + 1 ));
-                                done
+                        echo "2 - executando a imagem do container no ambiente de teste"
+                        docker run -d --name $CONTAINER_NAME -e APP_ENV="-Dspring.profiles.active=test" ${imageName}
 
 
-                                echo "derrubando o container após utiliza-lo no teste"
-                                docker rm -f udiapub-job_teste
+                        echo "3 - esperando a aplicação subir por até 25 seg"
+                        NEXT_WAIT_TIME=0
+                        APP_STATUS=
+                        until [ $NEXT_WAIT_TIME -gt 5 ] || [ ${APP_STATUS} = "\\"healthy\\""  ]; do
+                          sleep 5;
+                          APP_STATUS=$(docker inspect --format \'{{json .State.Health.Status}}\' $CONTAINER_NAME)
+                          NEXT_WAIT_TIME=$(( $NEXT_WAIT_TIME + 1 ));
+                        done
 
 
-                                echo "verificar se no log contem o texto \'Started UdiaPubJobApplication\' para considerar que subiu com sucesso"
-                                if [ ${#APP_STATUS} -eq 0 ]; then
-                                  exit 1
-                                fi'''
+                        echo "4 - derrubando o container após utiliza-lo no teste"
+                        docker rm -f $CONTAINER_NAME
+
+
+                        echo "5 - verificando o status da aplicação"
+                        if [ ${APP_STATUS} != "\\"healthy\\"" ]; then
+                          echo " --> a applicação não foi executada com sucesso"
+                          exit 1
+                        fi'''
 
                         customImage.push()
                     }
