@@ -7,12 +7,15 @@
             stage('Build do projeto e da imagem') {
                 steps {
                     script{
-                        sh 'mvn clean install -P dev'
+                        tag = env.GIT_BRANCH
+                        appEnv = tag.equals("dev")  ? "dev" : "prod"
+                        jobBuild = "udiapub-jobs-deploy-${appEnv}"
+
+                        sh 'mvn clean install -P ${appEnv}'
                         appName = "udiapub-job-image"
                         registryHost = "127.0.0.1:30400/"
-                        imageName = "${registryHost}${appName}:latest" //  imageName = "${registryHost}${appName}:${tag}"
+                        imageName = "${registryHost}${appName}:${tag}"
                         customImage = docker.build("${imageName}", "./adapter/job")
-                        //def customImage = docker.build('${imageName}', './adapter/job')
                     }
                 }
             }
@@ -55,14 +58,10 @@
                     }
                 }
             }
-            stage('Deploy da aplicação no k8s') {
+            stage (deploy) {
                 steps {
-                    withKubeConfig([credentialsId: '68f8f514-42d5-4579-8ed5-d65f1ad0b8e5']) {
-                        // sh 'curl -LO "https://storage.googleapis.com/kubernetes-release/release/v1.20.5/bin/linux/amd64/kubectl"'
-                        // sh 'chmod u+x ./kubectl'
-                        sh "./kubectl apply -f adapter/job/k8s.yml --namespace=default"
-                        sh "./kubectl set image deployment job-udiapub-deployment job-udiapub-container=${imageName} --record --namespace=default"
-                        sh "./kubectl rollout status deployment/job-udiapub-deployment --namespace=default"
+                    script {
+                        build job: "${jobBuild}", wait: false, parameters: [[$class: 'StringParameterValue', name: 'image', value: "${imageName}"]]
                     }
                 }
             }
