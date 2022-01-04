@@ -10,22 +10,13 @@
                         tag = env.GIT_BRANCH
                         appEnv = tag.equals("dev")  ? "dev" : "prod"
                         jobBuild = "udiapub-jobs-deploy-${appEnv}"
-
                         sh "mvn clean install -P ${appEnv}"
-                        appName = "udiapub-job-image"
-                        registryHost = "127.0.0.1:30910/"
-                        imageName = "${appName}"
-                        //imageName = "${registryHost}${appName}:${tag}"
-                        //customImage = docker.build("${imageName}", "./adapter/job")
-                        customImage = docker.build("${imageName}", "./adapter/job")
                     }
                 }
             }
             stage('Testando a imagem') {
                 steps {
                     script{
-//                         sh "CONTAINER_NAME=udiapub-job_teste"
-//                         sh "IMAGE_NAME=${imageName}"
                         sh '''#!/bin/sh
 
                         echo "1 - verificando se existe um container de teste em execução"
@@ -36,11 +27,15 @@
                         fi
 
 
-                        echo "2 - executando a imagem do container no ambiente de teste"
+                        echo "2 - realizando build da imagem de teste"
+                        docker build adapter/job -t udiapub-job-image
+
+
+                        echo "3 - executando a imagem do container no ambiente de teste"
                         docker run -d --name udiapub-job_teste -e APP_ENV="-Dspring.profiles.active=test" udiapub-job-image
 
 
-                        echo "3 - esperando a aplicação subir por até 25 seg"
+                        echo "4 - esperando a aplicação subir por até 25 seg"
                         NEXT_WAIT_TIME=0
                         APP_STATUS=
                         until [ $NEXT_WAIT_TIME -gt 5 ] || [ ${#APP_STATUS} -gt 0  ]; do
@@ -50,11 +45,11 @@
                         done
 
 
-                        echo "4 - derrubando o container após utiliza-lo no teste"
+                        echo "5 - derrubando o container após utiliza-lo no teste"
                         docker rm -f udiapub-job_teste
 
 
-                        echo "5 - verificando o status da aplicação"
+                        echo "6 - verificando o status da aplicação"
                         if [ ${#APP_STATUS} -eq 0 ]; then
                           echo " --> a applicação não foi executada com sucesso"
                           exit 1
@@ -65,7 +60,10 @@
             stage (deploy) {
                 steps {
                     script {
-                        customImage.push()
+                        appName = "udiapub-job-image"
+                        registryHost = "127.0.0.1:30910/"
+                        imageName = "${registryHost}${appName}:${tag}"
+                        docker.build("${imageName}", "./adapter/job").push()
                         build job: "${jobBuild}", wait: false, parameters: [[$class: 'StringParameterValue', name: 'image', value: "${imageName}"]]
                     }
                 }
