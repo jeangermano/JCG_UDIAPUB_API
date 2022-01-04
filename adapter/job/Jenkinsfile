@@ -13,7 +13,7 @@
 
                         sh "mvn clean install -P ${appEnv}"
                         appName = "udiapub-job-image"
-                        registryHost = "127.0.0.1:30400/"
+                        registryHost = "127.0.0.1:30910/"
                         imageName = "${registryHost}${appName}:${tag}"
                         customImage = docker.build("${imageName}", "./adapter/job")
                     }
@@ -37,34 +37,48 @@
                         echo "2 - executando a imagem do container no ambiente de teste"
                         docker run -d --name "$CONTAINER_NAME" -e APP_ENV="-Dspring.profiles.active=test" "$IMAGE_NAME"
 
+//                         bug no virtualDrive virtualbox não deixa baixar o curl na imagem
+//                         echo "3 - esperando a aplicação subir por até 25 seg"
+//                         NEXT_WAIT_TIME=0
+//                         APP_STATUS=
+//                         until [ $NEXT_WAIT_TIME -gt 5 ] || [ "$APP_STATUS" = "\\"healthy\\""  ]; do
+//                           sleep 5;
+//                           APP_STATUS=$(docker inspect --format \'{{json .State.Health.Status}}\' "$CONTAINER_NAME")
+//                           NEXT_WAIT_TIME=$(( $NEXT_WAIT_TIME + 1 ));
+//                         done
 
-                        echo "3 - esperando a aplicação subir por até 25 seg"
-                        NEXT_WAIT_TIME=0
-                        APP_STATUS=
-                        until [ $NEXT_WAIT_TIME -gt 5 ] || [ "$APP_STATUS" = "\\"healthy\\""  ]; do
-                          sleep 5;
-                          APP_STATUS=$(docker inspect --format \'{{json .State.Health.Status}}\' "$CONTAINER_NAME")
-                          NEXT_WAIT_TIME=$(( $NEXT_WAIT_TIME + 1 ));
-                        done
+                           echo "3 - esperando a aplicação subir por até 25 seg"
+                           NEXT_WAIT_TIME=0
+                           APP_STATUS=
+                           until [ $NEXT_WAIT_TIME -gt 5 ] || [ ${#APP_STATUS} -gt 0  ]; do
+                             sleep 5;
+                             APP_STATUS=$(docker logs "$CONTAINER_NAME" | grep "Started UdiaPubJobApplication")
+                             NEXT_WAIT_TIME=$(( $NEXT_WAIT_TIME + 1 ));
+                           done
 
 
                         echo "4 - derrubando o container após utiliza-lo no teste"
                         docker rm -f "$CONTAINER_NAME"
 
 
+//                         echo "5 - verificando o status da aplicação"
+//                         if [ "$APP_STATUS" != "\\"healthy\\"" ]; then
+//                           echo " --> a applicação não foi executada com sucesso"
+//                           exit 1
+//                         fi
+
                         echo "5 - verificando o status da aplicação"
-                        if [ "$APP_STATUS" != "\\"healthy\\"" ]; then
+                        if [ ${#APP_STATUS} -eq 0 ]; then
                           echo " --> a applicação não foi executada com sucesso"
                           exit 1
                         fi'''
-
-                        customImage.push()
                     }
                 }
             }
             stage (deploy) {
                 steps {
                     script {
+                        customImage.push()
                         build job: "${jobBuild}", wait: false, parameters: [[$class: 'StringParameterValue', name: 'image', value: "${imageName}"]]
                     }
                 }
