@@ -22,7 +22,7 @@
             stage('Testando a imagem') {
                 steps {
                     script{
-                        sh '''#!/bin/sh
+                        sh '#!/bin/sh
                         CONTAINER_NAME=udiapub-job_teste
 
 
@@ -56,7 +56,7 @@
                         if [ "$APP_STATUS" != "\\"healthy\\"" ]; then
                           echo " --> a applicação não foi executada com sucesso"
                           exit 1
-                        fi'''
+                        fi'
 
                         customImage.push()
                     }
