@@ -27,7 +27,7 @@
 
 
                         echo "1 - verificando se existe um container de teste em execução"
-                        HAS_CONTAINER=$(docker ps -a -aq --filter name=${CONTAINER_NAME})
+                        HAS_CONTAINER=$(docker ps -a -aq --filter name="$CONTAINER_NAME")
                         if [ ${#HAS_CONTAINER} -ge 2 ]; then
                           echo " --> existe! realizando remoção"
                           docker rm -f $HAS_CONTAINER
@@ -35,7 +35,7 @@
 
 
                         echo "2 - executando a imagem do container no ambiente de teste"
-                        docker run -d --name ${CONTAINER_NAME} -e APP_ENV="-Dspring.profiles.active=test" ${imageName}
+                        docker run -d --name "$CONTAINER_NAME" -e APP_ENV="-Dspring.profiles.active=test" ${imageName}
 
 
                         echo "3 - esperando a aplicação subir por até 25 seg"
@@ -43,13 +43,13 @@
                         APP_STATUS=
                         until [ $NEXT_WAIT_TIME -gt 5 ] || [ "$APP_STATUS" = "\\"healthy\\""  ]; do
                           sleep 5;
-                          APP_STATUS=$(docker inspect --format \'{{json .State.Health.Status}}\' ${CONTAINER_NAME})
+                          APP_STATUS=$(docker inspect --format \'{{json .State.Health.Status}}\' "$CONTAINER_NAME")
                           NEXT_WAIT_TIME=$(( $NEXT_WAIT_TIME + 1 ));
                         done
 
 
                         echo "4 - derrubando o container após utiliza-lo no teste"
-                        docker rm -f ${CONTAINER_NAME}
+                        docker rm -f "$CONTAINER_NAME"
 
 
                         echo "5 - verificando o status da aplicação"
