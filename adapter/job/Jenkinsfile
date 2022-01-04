@@ -9,7 +9,7 @@
                     script{
                         tag = env.GIT_BRANCH
                         appEnv = tag.equals("dev")  ? "dev" : "prod"
-                        jobBuild = "udiapub-jobs-deploy-${appEnv}"
+                        jobBuild = "udiapub-job-deploy-${appEnv}"
                         sh "mvn clean install -P ${appEnv}"
                     }
                 }
@@ -26,14 +26,23 @@
                           docker rm -f $HAS_CONTAINER
                         fi
 
+                        echo " "
+                        echo " "
+                        echo " "
 
                         echo "2 - realizando build da imagem de teste"
                         docker build adapter/job -t udiapub-job-image
 
+                        echo " "
+                        echo " "
+                        echo " "
 
                         echo "3 - executando a imagem do container no ambiente de teste"
                         docker run -d --name udiapub-job_teste -e APP_ENV="-Dspring.profiles.active=test" udiapub-job-image
 
+                        echo " "
+                        echo " "
+                        echo " "
 
                         echo "4 - esperando a aplicação subir por até 25 seg"
                         NEXT_WAIT_TIME=0
@@ -44,16 +53,28 @@
                           NEXT_WAIT_TIME=$(( $NEXT_WAIT_TIME + 1 ));
                         done
 
+                        echo " "
+                        echo " "
+                        echo " "
 
                         echo "5 - derrubando o container após utiliza-lo no teste"
                         docker rm -f udiapub-job_teste
 
+                        echo " "
+                        echo " "
+                        echo " "
 
                         echo "6 - verificando o status da aplicação"
                         if [ ${#APP_STATUS} -eq 0 ]; then
                           echo " --> a applicação não foi executada com sucesso"
                           exit 1
-                        fi'''
+                        fi
+
+                        echo " "
+                        echo " "
+                        echo " "
+
+                        '''
                     }
                 }
             }
