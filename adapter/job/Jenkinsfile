@@ -22,12 +22,10 @@
             stage('Testando a imagem') {
                 steps {
                     script{
-                        sh "CONTAINER_NAME=udiapub-job_teste"
-                        sh "IMAGE_NAME=${imageName}"
                         sh '''#!/bin/sh
 
                         echo "1 - verificando se existe um container de teste em execução"
-                        HAS_CONTAINER=$(docker ps -a -aq --filter name=$CONTAINER_NAME)
+                        HAS_CONTAINER=$(docker ps -a -aq --filter name=udiapub-job_teste)
                         if [ ${#HAS_CONTAINER} -ge 2 ]; then
                           echo " --> existe! realizando remoção"
                           docker rm -f $HAS_CONTAINER
@@ -35,7 +33,7 @@
 
 
                         echo "2 - executando a imagem do container no ambiente de teste"
-                        docker run -d --name $CONTAINER_NAME -e APP_ENV="-Dspring.profiles.active=test" $IMAGE_NAME
+                        docker run -d --name udiapub-job_teste -e APP_ENV="-Dspring.profiles.active=test" udiapub-job-image
 
 
                         echo "3 - esperando a aplicação subir por até 25 seg"
@@ -43,13 +41,13 @@
                         APP_STATUS=
                         until [ $NEXT_WAIT_TIME -gt 5 ] || [ ${#APP_STATUS} -gt 0  ]; do
                         sleep 5;
-                          APP_STATUS=$(docker logs $CONTAINER_NAME | grep "Started UdiaPubJobApplication")
+                          APP_STATUS=$(docker logs udiapub-job_teste | grep "Started UdiaPubJobApplication")
                           NEXT_WAIT_TIME=$(( $NEXT_WAIT_TIME + 1 ));
                         done
 
 
                         echo "4 - derrubando o container após utiliza-lo no teste"
-                        docker rm -f $CONTAINER_NAME
+                        docker rm -f udiapub-job_teste
 
 
                         echo "5 - verificando o status da aplicação"
