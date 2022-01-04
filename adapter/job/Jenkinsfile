@@ -35,7 +35,7 @@
 
 
                         echo "2 - executando a imagem do container no ambiente de teste"
-                        docker run -d --name $CONTAINER_NAME -e APP_ENV="-Dspring.profiles.active=test" ${imageName}
+                        docker run -d --name $CONTAINER_NAME -e APP_ENV="-Dspring.profiles.active=test" $IMAGE_NAME
 
 
                         echo "3 - esperando a aplicação subir por até 25 seg"
