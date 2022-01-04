@@ -24,7 +24,9 @@
                     script{
                         sh "CONTAINER_NAME=udiapub-job_teste"
                         sh "IMAGE_NAME=${imageName}"
-                        sh '''echo "1 - verificando se existe um container de teste em execução"
+                        sh '''#!/bin/sh
+
+                        echo "1 - verificando se existe um container de teste em execução"
                         HAS_CONTAINER=$(docker ps -a -aq --filter name=$CONTAINER_NAME)
                         if [ ${#HAS_CONTAINER} -ge 2 ]; then
                           echo " --> existe! realizando remoção"
