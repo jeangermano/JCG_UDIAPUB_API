@@ -1,4 +1,4 @@
-package br.com.jcg.udiapub.application.service.supplier;
+package br.com.jcg.udiapub.application.port.in.supplier;
 
 import br.com.jcg.udiapub.domain.citycouncilor.CityCouncilor;
 

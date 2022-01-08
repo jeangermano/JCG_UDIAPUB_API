@@ -1,4 +1,4 @@
-package br.com.jcg.udiapub.application.service.supplier.impl.response;
+package br.com.jcg.udiapub.adapter.supplier.response.councilor;
 
 import br.com.jcg.udiapub.domain.citycouncilor.CityCouncilor;
 import br.com.jcg.udiapub.domain.citycouncilor.CityCouncilorFactory;
@@ -7,9 +7,9 @@ import lombok.Data;
 
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class CityCouncilorUdiaAgentePoliticoResponse {
+public class AgentePoliticoResponse {
     private Long id;
-    private CityCouncilorUdiaPessoaResponse pessoa;
+    private PessoaResponse pessoa;
     private String nomePolitico;
 
     public CityCouncilor toDomain() {

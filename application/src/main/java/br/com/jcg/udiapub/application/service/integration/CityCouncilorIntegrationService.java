@@ -1,77 +1,64 @@
 package br.com.jcg.udiapub.application.service.integration;
 
-import br.com.jcg.udiapub.application.port.in.CityCouncilorIntegration;
+import br.com.jcg.udiapub.application.port.in.usecase.CityCouncilorIntegration;
 import br.com.jcg.udiapub.application.port.out.CityCouncilorRepository;
-import br.com.jcg.udiapub.application.port.out.SystemIntegrationConfigRepository;
-import br.com.jcg.udiapub.application.service.supplier.CityCouncilorSupplier;
+import br.com.jcg.udiapub.application.port.out.IntegrationParameterScheduleRepository;
+import br.com.jcg.udiapub.application.service.integration.event.CityCouncilorIntegrationEvent;
+import br.com.jcg.udiapub.application.port.in.supplier.CityCouncilorSupplier;
+import br.com.jcg.udiapub.application.shared.EventPublisher;
 import br.com.jcg.udiapub.domain.parameter.IntegrationType;
+import lombok.AllArgsConstructor;
 
-import java.time.LocalDate;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+@AllArgsConstructor
 public class CityCouncilorIntegrationService implements CityCouncilorIntegration {
-
-    SystemIntegrationConfigRepository systemIntegrationConfigRepository;
-
-    CityCouncilorRepository cityCouncilorRepository;
-
-    CityCouncilorSupplier cityCouncilorSupplier;
 
     private final IntegrationType integrationType = IntegrationType.CITY_COUNCILOR;
 
-    public CityCouncilorIntegrationService(SystemIntegrationConfigRepository systemIntegrationConfigRepository,
-                                           CityCouncilorRepository cityCouncilorRepository,
-                                           CityCouncilorSupplier cityCouncilorSupplier) {
-        this.systemIntegrationConfigRepository = systemIntegrationConfigRepository;
-        this.cityCouncilorRepository = cityCouncilorRepository;
-        this.cityCouncilorSupplier = cityCouncilorSupplier;
-    }
+    IntegrationParameterScheduleRepository integrationParameterScheduleRepository;
+    CityCouncilorRepository cityCouncilorRepository;
+    CityCouncilorSupplier cityCouncilorSupplier;
+    EventPublisher eventPublisher;
 
     @Override
     public boolean isToUpdateLocalBase() {
 
-        var systemIntegrationConfig = systemIntegrationConfigRepository.getByType(integrationType);
-        if(Objects.isNull(systemIntegrationConfig) || !systemIntegrationConfig.isActive()) {
+        var integrationParameterSchedule = integrationParameterScheduleRepository.findByType(integrationType);
+        if(Objects.isNull(integrationParameterSchedule)) {
             return false;
         }
 
-        if(Objects.isNull(systemIntegrationConfig.getLastIntegration())) {
-            return true;
-        }
-
-        var lastIntegrationDay = systemIntegrationConfig.getLastIntegration().toLocalDate();
-        switch (systemIntegrationConfig.getFrequency()) {
-            case DAILY:
-                return lastIntegrationDay.isBefore(LocalDate.now());
-            case MONTHLY:
-                return lastIntegrationDay.getMonth().getValue() < LocalDate.now().getMonth().getValue();
-            case YEARLY:
-                return lastIntegrationDay.getYear() < LocalDate.now().getYear();
-            default:
-                return false;
-        }
+        return integrationParameterSchedule.isToUpdate();
     }
 
     @Override
     public void loadLocalBase() {
 
-        if(true) {
+        if(isToUpdateLocalBase()) {
 
-            var councilorsOfCurrentLegislature = cityCouncilorSupplier.getCouncilorsOfCurrentLegislature();
+            try {
+                var councilorsOfCurrentLegislature = cityCouncilorSupplier.getCouncilorsOfCurrentLegislature();
 
-            var cityCouncilorInLocalBase = cityCouncilorRepository.getAll();
-            if(cityCouncilorInLocalBase.isEmpty()) {
-                cityCouncilorRepository.saveAll(councilorsOfCurrentLegislature);
-                return;
-            }
+                var cityCouncilorInLocalBase = cityCouncilorRepository.getAll();
+                if(cityCouncilorInLocalBase.isEmpty()) {
+                    cityCouncilorRepository.saveAll(councilorsOfCurrentLegislature);
+                    return;
+                }
 
-            var newCouncilors = councilorsOfCurrentLegislature.stream()
-                .filter(cl -> !cityCouncilorInLocalBase.contains(cl))
-                .collect(Collectors.toList());
+                var newCouncilors = councilorsOfCurrentLegislature.stream()
+                    .filter(cl -> !cityCouncilorInLocalBase.contains(cl))
+                    .collect(Collectors.toList());
 
-            if(!newCouncilors.isEmpty()) {
-                cityCouncilorRepository.saveAll(newCouncilors);
+                if(!newCouncilors.isEmpty()) {
+                    cityCouncilorRepository.saveAll(newCouncilors);
+                }
+
+                eventPublisher.publish(new CityCouncilorIntegrationEvent());
+
+            } catch (Exception e) {
+                eventPublisher.publish(new CityCouncilorIntegrationEvent(e));
             }
         }
     }

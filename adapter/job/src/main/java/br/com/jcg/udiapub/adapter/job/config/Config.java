@@ -1,5 +1,8 @@
 package br.com.jcg.udiapub.adapter.job.config;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.MapperFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
@@ -22,7 +25,7 @@ public class Config {
 
     private static final String[] adaptersPath = {
         "br.com.jcg.udiapub.adapter.persistence.councilor",
-        "br.com.jcg.udiapub.adapter.persistence.integrationconf"};
+        "br.com.jcg.udiapub.adapter.persistence.parameter"};
 
     private static final String[] applicationsPortPath = {
         "br.com.jcg.udiapub.application.port.out",
@@ -50,5 +53,12 @@ public class Config {
         return (MetadataReader mr, MetadataReaderFactory mrf) -> !mr.getClassMetadata()
             .getClassName()
             .endsWith("Model");
+    }
+
+    @Bean
+    public ObjectMapper objectMapper() {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        return mapper;
     }
 }

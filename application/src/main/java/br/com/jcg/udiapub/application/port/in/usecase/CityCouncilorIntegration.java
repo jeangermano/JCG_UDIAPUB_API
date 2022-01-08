@@ -1,4 +1,4 @@
-package br.com.jcg.udiapub.application.port.in;
+package br.com.jcg.udiapub.application.port.in.usecase;
 
 public interface CityCouncilorIntegration {
     boolean isToUpdateLocalBase();

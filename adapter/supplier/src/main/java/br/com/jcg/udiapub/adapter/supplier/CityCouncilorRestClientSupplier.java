@@ -1,7 +1,8 @@
-package br.com.jcg.udiapub.application.service.supplier.impl;
+package br.com.jcg.udiapub.adapter.supplier;
 
-import br.com.jcg.udiapub.application.service.supplier.CityCouncilorSupplier;
-import br.com.jcg.udiapub.application.service.supplier.impl.response.CityCouncilorUdiaAgentePoliticoResponse;
+import br.com.jcg.udiapub.adapter.supplier.mapper.CityCouncilorSupplierMapper;
+import br.com.jcg.udiapub.application.port.in.supplier.CityCouncilorSupplier;
+import br.com.jcg.udiapub.adapter.supplier.response.councilor.AgentePoliticoResponse;
 import br.com.jcg.udiapub.domain.citycouncilor.CityCouncilor;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -13,11 +14,10 @@ import java.net.http.HttpResponse;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class CityCouncilorUdiaSupplier implements CityCouncilorSupplier {
+public class CityCouncilorRestClientSupplier implements CityCouncilorSupplier {
 
     @Override
     public List<CityCouncilor> getCouncilorsOfCurrentLegislature() {
-
         HttpRequest request;
 
         try {
@@ -31,12 +31,13 @@ public class CityCouncilorUdiaSupplier implements CityCouncilorSupplier {
             if(response.statusCode() >= 200 && response.statusCode() < 300) {
                 var objectMapper = new ObjectMapper();
                 objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-                List<CityCouncilorUdiaAgentePoliticoResponse> cityList = objectMapper.readValue(
+
+                List<AgentePoliticoResponse> cityList = objectMapper.readValue(
                     response.body(),
-                    objectMapper.getTypeFactory().constructCollectionType(List.class, CityCouncilorUdiaAgentePoliticoResponse.class));
+                    objectMapper.getTypeFactory().constructCollectionType(List.class, AgentePoliticoResponse.class));
 
                 return cityList.stream()
-                    .map(CityCouncilorUdiaAgentePoliticoResponse::toDomain)
+                    .map(CityCouncilorSupplierMapper.MAPPER::toDomain)
                     .collect(Collectors.toList());
             }
 
@@ -45,5 +46,6 @@ public class CityCouncilorUdiaSupplier implements CityCouncilorSupplier {
         }
 
         return null;
+
     }
 }
