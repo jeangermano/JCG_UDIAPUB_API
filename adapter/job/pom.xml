@@ -28,8 +28,18 @@
         </dependency>
 
         <dependency>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>kafka-clients</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>br.com.jcg.udiapub</groupId>
             <artifactId>udiapub-persistence</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>br.com.jcg.udiapub</groupId>
+            <artifactId>udiapub-supplier</artifactId>
         </dependency>
 
         <dependency>

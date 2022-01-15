@@ -1,7 +1,6 @@
-package br.com.jcg.udiapub.adapter.job.config;
+package br.com.jcg.udiapub.adapter.job.scheduled.config;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
@@ -34,6 +33,10 @@ public class Config {
     private static final String[] servicesPath = {
         "br.com.jcg.udiapub.application.service.integration"};
 
+    private static final String[] supplierPath = {
+        "br.com.jcg.udiapub.adapter.supplier",
+        "br.com.jcg.udiapub.adapter.job.broker.kafka"};
+
     @Bean
     BeanFactoryPostProcessor beanFactoryPostProcessor(ApplicationContext beanRegistry) {
         return beanFactory -> {
@@ -45,6 +48,7 @@ public class Config {
         ClassPathBeanDefinitionScanner beanDefinitionScanner = new ClassPathBeanDefinitionScanner(beanRegistry);
         beanDefinitionScanner.addIncludeFilter(removeModelAndEntitiesFilter());
         beanDefinitionScanner.scan(adaptersPath);
+        beanDefinitionScanner.scan(supplierPath);
         beanDefinitionScanner.scan(servicesPath);
         beanDefinitionScanner.scan(applicationsPortPath);
     }

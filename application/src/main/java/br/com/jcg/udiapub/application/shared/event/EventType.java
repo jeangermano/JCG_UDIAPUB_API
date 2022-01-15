@@ -1,4 +1,4 @@
-package br.com.jcg.udiapub.application.shared;
+package br.com.jcg.udiapub.application.shared.event;
 
 import lombok.Getter;
 

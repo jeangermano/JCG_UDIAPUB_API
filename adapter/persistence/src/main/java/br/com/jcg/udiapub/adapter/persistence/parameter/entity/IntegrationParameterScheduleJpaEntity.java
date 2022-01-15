@@ -1,4 +1,4 @@
-package br.com.jcg.udiapub.adapter.persistence.parameter;
+package br.com.jcg.udiapub.adapter.persistence.parameter.entity;
 
 import br.com.jcg.udiapub.domain.parameter.IntegrationFrequencyType;
 import br.com.jcg.udiapub.domain.parameter.IntegrationType;
@@ -11,6 +11,8 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import java.time.LocalDateTime;
@@ -25,6 +27,7 @@ public class IntegrationParameterScheduleJpaEntity {
 
     @Id
     @Column(name = "id")
+    @GeneratedValue(strategy= GenerationType.IDENTITY)
     private Long id;
 
     @Column(name = "type")
@@ -39,6 +42,6 @@ public class IntegrationParameterScheduleJpaEntity {
     private LocalDateTime lastIntegration;
 
     @Column(name = "active")
-    private boolean isActive;
+    private Boolean isActive;
 
 }

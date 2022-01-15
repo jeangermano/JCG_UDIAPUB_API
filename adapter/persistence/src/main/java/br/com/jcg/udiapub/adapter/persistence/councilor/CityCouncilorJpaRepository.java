@@ -1,6 +1,6 @@
 package br.com.jcg.udiapub.adapter.persistence.councilor;
 
-import br.com.jcg.udiapub.application.port.out.CityCouncilorRepository;
+import br.com.jcg.udiapub.application.port.out.repository.CityCouncilorRepository;
 import br.com.jcg.udiapub.domain.citycouncilor.CityCouncilor;
 import lombok.AllArgsConstructor;
 
